@@ -7,10 +7,6 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/dj/:id', function(req, res, next) {
-    res.render('queue', { id: req.params.id });
-});
-
 router.get('/call/spotify/search', function(req, res) {
     searchCall = 'https://api.spotify.com/v1/search';
     request.get({url: searchCall, qs: req.query}, function(err, response, body) {
