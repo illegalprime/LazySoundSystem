@@ -40,7 +40,7 @@ function updateHints(data) {
         tracks = data.tracks.items;
         for (var i = 0; i < tracks.length; ++i) {
             list += "<li><p><a href='"
-            + tracks[i].external_urls.spotify + "'>"
+            + tracks[i].external_urls.spotify + "' target='_newtab'>"
             + tracks[i].name + " - "
             + tracks[i].artists[0].name + "</a></p></li>";
         }
