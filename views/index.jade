@@ -3,3 +3,6 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
+  form(action='/dj', method='post')
+      p What is your name?
+      input(type='text' id='name' name='name')
