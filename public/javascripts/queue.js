@@ -2,6 +2,7 @@ var search_req;
 var newestQuery;
 
 function searchFor(query, callback) {
+    if (query == "") return;
     newestQuery = query;
     if (search_req) {
         search_req.abort();

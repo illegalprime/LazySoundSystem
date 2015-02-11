@@ -3,6 +3,6 @@ extends layout
 block content
     h1= id
     p Welcome to #{id}'s Queue
-    input(type='text' id='search' name='q')
+    input(type='text' id='search' autocomplete="off" name='q')
     div(id='results')
     script(src='/javascripts/queue.js')
