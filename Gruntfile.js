@@ -1,9 +1,14 @@
 module.exports = function(grunt) {
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json')
-        // TODO define tasks
+        pkg: grunt.file.readJSON('package.json'),
+        jshint: {
+            all: ['*.js', 'public/**/*.js', 'routes/*.js']
+        }
     });
 
-    // TODO need this for everything to work
-    // grunt.registerTask('default', ['uglify']);
-}
+    // load the plugin that provides the 'uglify' task
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+
+    // set 'uglify' as the default task
+    grunt.registerTask('default', ['jshint']);
+};
