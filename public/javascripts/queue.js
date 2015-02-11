@@ -4,6 +4,10 @@ var newestQuery;
 function searchFor(query, callback) {
     if (query == "") return;
     newestQuery = query;
+    if (!query) {
+        callback();
+        return;
+    }
     if (search_req) {
         search_req.abort();
     }
@@ -18,20 +22,32 @@ function searchFor(query, callback) {
             if (query == newestQuery) {
                 callback(JSON.parse(data));
             }
+        },
+        error: function(data) {
+            console.log(data);
         }
     });
 }
 
+// `data` is the string from the search box passed here
+// by `searchFor`(our own function def'd above) as a
+// parameter for its callback function
 function updateHints(data) {
-    tracks = data.tracks.items;
-    list = "<ol>"
-    for (var i = 0; i < tracks.length; ++i) {
-        list += "<li><p><a href='"
-        + tracks[i].external_urls.spotify + "' />"
-        + tracks[i].name + " - "
-        + tracks[i].artists[0].name + "</a></p></li>";
+    var list = "<ol>";
+    if (!data || !data.tracks) {
+        list = "";
     }
-    document.getElementById("results").innerHTML = list + "</ol>";
+    else {
+        tracks = data.tracks.items;
+        for (var i = 0; i < tracks.length; ++i) {
+            list += "<li><p><a href='"
+            + tracks[i].external_urls.spotify + "' target='_newtab'>"
+            + tracks[i].name + " - "
+            + tracks[i].artists[0].name + "</a></p></li>";
+        }
+        list += "</ol>";
+    }
+    $("#results").html(list);
 }
 
 function init() {

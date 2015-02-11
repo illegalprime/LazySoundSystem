@@ -4,11 +4,7 @@ var router  = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-router.get('/dj/:id', function(req, res, next) {
-    res.render('queue', { id: req.params.id });
+  res.render('index', { title: 'The LazySoundSystem' });
 });
 
 router.get('/call/spotify/search', function(req, res) {
