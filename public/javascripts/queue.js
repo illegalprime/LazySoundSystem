@@ -2,9 +2,8 @@ var search_req;
 var newestQuery;
 
 function searchFor(query, callback) {
-    if (query == "") return;
     newestQuery = query;
-    if (!query) {
+    if (!query || query == "") {
         callback();
         return;
     }
@@ -22,9 +21,6 @@ function searchFor(query, callback) {
             if (query == newestQuery) {
                 callback(JSON.parse(data));
             }
-        },
-        error: function(data) {
-            console.log(data);
         }
     });
 }
@@ -36,6 +32,10 @@ function updateHints(data) {
     var list = "<ol>";
     if (!data || !data.tracks) {
         list = "";
+    }
+    else if (data.tracks.items.length == 0) {
+        // no results for your search
+        list = "No results";
     }
     else {
         tracks = data.tracks.items;
