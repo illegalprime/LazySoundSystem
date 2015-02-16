@@ -11,7 +11,6 @@ router.post('/', function(req, res, next) {
 
 router.get('/:id', function(req, res, next) {
     res.render('queue', { id: req.params.id });
-    next();
 });
 
 router.get('/:id/:user/', function(req, res, next) {
