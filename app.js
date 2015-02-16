@@ -13,8 +13,6 @@ var dj = require('./routes/dj');
 var app = express();
 
 // view engine setup
-// this is jade
-// app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
