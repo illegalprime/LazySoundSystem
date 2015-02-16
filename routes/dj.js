@@ -10,6 +10,7 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
+    // TODO check if queues are password protected
     res.render('queue', { id: req.params.id });
 });
 
