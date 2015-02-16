@@ -1,7 +1,9 @@
 var express = require('express');
 var Queue   = require('queue');
+var Firebase = require('firebase');
 var router = express.Router();
 
+var fb = new Firebase("https://lazysound.firebaseio.com/");
 var firequeues = {};
 var synccalls  = ['upvote', 'downvote'];
 
@@ -10,8 +12,21 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
-    // TODO check if queues are password protected
-    res.render('queue', { id: req.params.id });
+    // TODO check if queues exist/are password protected
+    // send user token etc etc
+
+    var queueName = req.params.id;
+    var namesRef = fb.child("names");
+
+    namesRef.child(queueName).once('value', function(snapshot) {
+      // Check if the queue exists already
+      if (snapshot.val() !== null) {
+          res.render('queue', { id: queueName });
+      } else {
+          // TODO new page!
+          res.render('queue', { id: "No existing queue" });
+      }
+    });
 });
 
 router.get('/:id/:user/', function(req, res, next) {
