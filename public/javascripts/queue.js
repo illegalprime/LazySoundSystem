@@ -50,6 +50,10 @@ function updateHints(data) {
     $("#results").html(list);
 }
 
+function addToQueue(song) {
+
+}
+
 function init() {
     $('#search').keyup(function() {
         searchFor($('#search').val(), updateHints);

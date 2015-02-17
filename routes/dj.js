@@ -31,16 +31,14 @@ router.get('/:id', function(req, res, next) {
 
 router.get('/:id/:user/', function(req, res, next) {
     authenticate(req.params.id, req.params.user, function(authenticated) {
-        if (authenticated) {
-            next();
+        if (!authenticated) {
+            res.status(403).send('Not Authenticated!');
         }
-        next('unauthenticated');
     });
 });
 
-router.get('/:id/:user/:track/:action', function(req, res) {
+router.get('/:id/:user/:action', function(req, res) {
     var action = req.params.action;
-    var track  = req.params.track;
     var user   = req.params.user;
     var id     = req.params.id;
 
@@ -53,7 +51,7 @@ router.get('/:id/:user/:track/:action', function(req, res) {
         }
 
         queue.push(function(cb) {
-            res.send(firecall(id, user, track, action));
+            res.send(firecall(id, user, action, req.body));
             cb();
         });
 
@@ -62,12 +60,32 @@ router.get('/:id/:user/:track/:action', function(req, res) {
         }
     }
     else {
-        res.send(firecall(id, user, track, action));
+        res.send(firecall(id, user, action, req.body));
     }
 });
 
-var firecall = function(id, user, track, action) {
-    return 'Firecalled: ' + id + '\t'  + user + '\t'  + track + '\t'  + action;
+var error = function(error) {
+    if (error) {
+        console.log("Data could not be saved." + error);
+    } else {
+        console.log("Data saved successfully.");
+    }
+}
+
+var firecall = function(id, user, action, data) {
+    var queue = fb.child("queue");
+    // queue.update({
+    //     name: 'Michael\'s Queue',
+    //     songs: {}
+    // }, error);
+
+    queue.child('songs/0-' + new Date().getTime()).push({
+            "album" : "Smash",
+            "artist" : "Martin Solveig",
+            "song" : "Get Away From You",
+            "stream" : "this-is-a-url"
+        }, error);
+    return 'Firecalled: ' + id + '\t'  + user + '\t'  + action;
 }
 
 var authenticate = function(id, user, callback) {
