@@ -10,5 +10,20 @@
 
     {{{body}}}
 
+    {{#if hbs}}
+    <script src="https://cdn.rawgit.com/components/handlebars.js/v2.0.0/handlebars.runtime.min.js"></script>
+    <script>
+        (function () {
+            var revive    = Handlebars.template;
+            var templates = Handlebars.templates || {};
+            {{#templates}}
+                console.log('{{{name}}} ' + '{{sds}} end');
+                templates['{{{name}}}'] = revive({{{template}}});
+            {{/templates}}
+            console.log(templates);
+        }());
+    </script>
+    {{/if}}
+
   </body>
 </html>
