@@ -16,14 +16,13 @@ router.get('/:id', function(req, res, next) {
     // send user token etc etc
 
     var queueName = req.params.id;
-    var namesRef = fb.child("names");
+    var names = fb.child("names");
 
-    namesRef.child(queueName).once('value', function(snapshot) {
+    names.child(queueName).once('value', function(snapshot) {
       // Check if the queue exists already
       if (snapshot.val() !== null) {
-          res.render('queue', { id: queueName });
+          res.render('queue', { id: queueName, hbs: true });
       } else {
-          // TODO new page!
           res.render('queue', { id: "No existing queue" });
       }
     });

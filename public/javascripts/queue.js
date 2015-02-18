@@ -29,29 +29,7 @@ function searchFor(query, callback) {
 // by `searchFor`(our own function def'd above) as a
 // parameter for its callback function
 function updateHints(data) {
-    var list = "<ol>";
-    if (!data || !data.tracks) {
-        list = "";
-    }
-    else if (data.tracks.items.length == 0) {
-        // no results for your search
-        list = "No results";
-    }
-    else {
-        tracks = data.tracks.items;
-        for (var i = 0; i < tracks.length; ++i) {
-            list += "<li><p><a href='"
-            + tracks[i].external_urls.spotify + "' target='_newtab'>"
-            + tracks[i].name + " - "
-            + tracks[i].artists[0].name + "</a></p></li>";
-        }
-        list += "</ol>";
-    }
-    $("#results").html(list);
-}
-
-function addToQueue(song) {
-
+    $("#results").html(Handlebars.templates['queue/search-results']({ items: data.tracks.items }))
 }
 
 function init() {
