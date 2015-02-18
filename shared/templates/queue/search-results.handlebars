@@ -1,6 +1,15 @@
+{{!
+This snippet will either display an ordered list of results or
+print a provided message (indicating that there were no results).
+}}
+
+{{#unless message}}
 <ol>
     {{#items}}
     <li><p><a href="{{{external_urls.spotify}}}" target="_newtab">
         {{{name}}} - {{{artists.[0].name}}}</a></p></li>
     {{/items}}
 </ol>
+{{else}}
+<p>{{ message }}</p>
+{{/unless}}
