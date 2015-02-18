@@ -1,6 +1,4 @@
 module.exports = {
-    oneDay : 86400000,
-
     consumeError : function(error) {
         if (error) console.log('Data could not be saved.' + error);
         else       console.log('Data saved successfully.');
