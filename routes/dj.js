@@ -12,7 +12,7 @@ router.post('/', function(req, res, next) {
             if (snapshot.val()) {
                 res.redirect('/dj/' + req.body.name);
             } else {
-                res.redirect('/dj/new/'+req.body.name);
+                res.redirect('/dj/new?q='+req.body.name);
             }
         });
     } else {
@@ -21,20 +21,22 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/new?', function(req, res, next) {
-    res.render('newQueue', { name : req.query.q });
-});
-
-router.get('/new/:id', function(req, res, next) {
     doesQueueExist(req.params.id, function(snapshot) {
         if (snapshot.val()) {
             // this queue already exists, no need to make a new one
-            res.redirect('/dj/'+req.params.id);
+            res.redirect('/dj/'+req.query.q);
         } else {
-            res.redirect('/dj/new?q='+req.params.id);
+            res.render('newQueue', { name : req.query.q });
         }
-    })
+    });
 });
 
+// TODO slowly deprecating this
+router.get('/new/:id', function(req, res, next) {
+    res.redirect('/dj/new?q='+req.params.id);
+});
+
+// TODO form validation here
 router.post('/new', function(req, res, next) {
     var queueName = req.body.name;
     // TODO add err catcher
@@ -53,13 +55,12 @@ router.get('/:id', function(req, res, next) {
         // Check if the queue exists already
         if (!key) {
             // Queue does not exist, add a new one!
-            key = addQueue(queueName); // this line doesn't work because async
-            // TODO redirect to "make new queue page"
+            res.redirect('/dj/new?q='+queueName);
         }
         res.render('queue', {
             id:    queueName,
             hbs:   true,
-            queue: key
+            key: key
         });
     });
 });
