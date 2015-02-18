@@ -3,9 +3,8 @@ var Queue   = require('queue');
 var Firebase = require('firebase');
 var router = express.Router();
 
-var fb = new Firebase("https://lazysound.firebaseio.com/");
+var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
-var synccalls  = ['upvote', 'downvote'];
 
 router.post('/', function(req, res, next) {
     res.redirect('/dj/' + req.body.name);
@@ -14,81 +13,133 @@ router.post('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
     // TODO check if queues exist/are password protected
     // send user token etc etc
-
     var queueName = req.params.id;
-    var names = fb.child("names");
 
-    names.child(queueName).once('value', function(snapshot) {
-      // Check if the queue exists already
-      if (snapshot.val() !== null) {
-          res.render('queue', { id: queueName, hbs: true });
-      } else {
-          res.render('queue', { id: "No existing queue" });
-      }
-    });
-});
-
-router.get('/:id/:user/', function(req, res, next) {
-    authenticate(req.params.id, req.params.user, function(authenticated) {
-        if (!authenticated) {
-            res.status(403).send('Not Authenticated!');
+    queueExists(queueName, function(snapshot) {
+        var key = snapshot.val();
+        // Check if the queue exists already
+        if (!key) {
+            // Queue does not exist, add a new one!
+            key = addQueue(queueName);
         }
-    });
-});
-
-router.get('/:id/:user/:action', function(req, res) {
-    var action = req.params.action;
-    var user   = req.params.user;
-    var id     = req.params.id;
-
-    if (synccalls.indexOf(action) != -1) {
-        var queue = firequeues[id];
-
-        if (queue == undefined) {
-            firequeues[id] = new Queue();
-            queue = firequeues[id];
-        }
-
-        queue.push(function(cb) {
-            res.send(firecall(id, user, action, req.body));
-            cb();
+        res.render('queue', {
+            id:    queueName,
+            hbs:   true,
+            queue: key
         });
-
-        if (!queue.running) {
-            queue.start();
-        }
-    }
-    else {
-        res.send(firecall(id, user, action, req.body));
-    }
+    });
 });
 
-var error = function(error) {
-    if (error) {
-        console.log("Data could not be saved." + error);
-    } else {
-        console.log("Data saved successfully.");
-    }
+// router.get('/:id/:user/', function(req, res, next) {
+//     authenticate(req.params.id, req.params.user, function(authenticated) {
+//         if (!authenticated) {
+//             res.status(403).send('Not Authenticated!');
+//         }
+//     });
+// });
+
+// Requests are of this form:
+// GET /action/:action
+//
+// Request Body (Elements exist if applicable):
+// {
+//     'userKey': '-Ji756Q4yxaqR8R3iq53'
+//     'queueID': '-JiPg6Q4yXaqWQR3Rq53',
+//     'songID' : '-JiPfQmCAuMrk-kM1TQO', // Omit if adding song
+//     'song': {               // Only if adding song
+//         'artist' : artist,
+//         'album'  : album,
+//         'name'   : name,
+//         'cover'  : cover,
+//         'stream' : stream
+//     }
+// }
+router.post('/:id/action/:action', function(req, res) {
+    var id     = req.params.id;
+    var action = req.params.action;
+    // if (synccalls[action] !== null) {
+    //     var serialize = firequeues[id];
+    //
+    //     if (serialize == undefined) {
+    //         firequeues[id] = new Queue();
+    //         serialize = firequeues[id];
+    //     }
+    //     serialize.push(function(cb) {
+    //         synccalls[action](req.body);
+    //         res.send("OK");
+    //         cb();
+    //     });
+    //
+    //     if (!serialize.running) {
+    //         serialize.start();
+    //     }
+    // }
+    // else {
+    //     calls[action](req.body);
+    //     res.send("OK");
+    // }
+    calls[action](req.body);
+});
+
+var consumeError = function(error) {
+    if (error) console.log('Data could not be saved.' + error);
+    else       console.log('Data saved successfully.');
 }
 
-var firecall = function(id, user, action, data) {
-    var queue = fb.child("queue");
-    // queue.update({
-    //     name: 'Michael\'s Queue',
-    //     songs: {}
+var add = function(queue, data) {
+    console.log("Called Add Song!");
+    // queue.push({
+    //     'priority' : 0,
+    //     'votes'    : {},
+    //     'song': {
+    //         'artist' : data.artist,
+    //         'album'  : data.album,
+    //         'name'   : data.name,
+    //         'cover'  : data.cover,
+    //         'stream' : data.stream
+    //     }
     // }, error);
-
-    queue.child('songs/0-' + new Date().getTime()).push({
-            "album" : "Smash",
-            "artist" : "Martin Solveig",
-            "song" : "Get Away From You",
-            "stream" : "this-is-a-url"
-        }, error);
-    return 'Firecalled: ' + id + '\t'  + user + '\t'  + action;
 }
+
+var upvote = function(queue, data, user) {
+    queue.child()
+}
+
+var calls = {
+    'add':  add
+    // 'veto': remove
+};
+var synccalls  = {
+    // 'upvote':   upvote,
+    // 'downvote': downvote
+};
 
 var authenticate = function(id, user, callback) {
     callback(false);
+}
+
+var addQueue = function(name) {
+    /*
+    TODO: Add CAPTCHA Functionality
+    */
+    var names = fb.child('names');
+    var queues = fb.child('queues');
+
+    var newQueue = queues.push({
+        'name':  name,
+        'songs': {}
+    }, consumeError);
+
+    var nameEntry = {};
+    nameEntry[name] = newQueue.key();
+    names.update(nameEntry);
+
+    return newQueue.key();
+}
+
+var queueExists = function(name, callback) {
+    var names = fb.child('names');
+    names.child(name).once('value', callback);
 }
 
 // spotify api search redirect is still in `index.js`
