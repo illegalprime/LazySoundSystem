@@ -130,9 +130,20 @@ var consumeError = function(error) {
     else       console.log('Data saved successfully.');
 }
 
+// API for adding a song:
+// {
+//     "queueID": "-JiSZLt18d9C5zmpQDBw",
+//     "song": {
+//         "artist": "The Dandy Warhols",
+//         "album":  "Thirteen Tales From Urban Bohemia",
+//         "name":   "Bohemian Like You",
+//         "cover":  "https://images.juno.co.uk/full/CS1863225-02A-BIG.jpg",
+//         "stream": "https://play.spotify.com/looooong_url"
+//     }
+// }
 var addSong = function(data, callback) {
     if (!data.queueID || !data.song) {
-        return false;
+        callback(false);
     }
 
     var song  = data.song;
@@ -154,8 +165,14 @@ var addSong = function(data, callback) {
     });
 }
 
+// API for upvoting a song:
 var upvote = function(data, callback) {
-    // fb.child('');
+    if (!data.queueID || !data.songID || !data.user) {
+        callback(false);
+    }
+
+    var song  = fb.child('queues/' + data.queueID + '/' + data.songID);
+    var votes = song.child('votes');
 }
 
 var calls = {
@@ -163,7 +180,7 @@ var calls = {
     // 'veto': remove
 };
 var synccalls  = {
-    // 'upvote':   upvote,
+    'upvote':   upvote,
     // 'downvote': downvote
 };
 
