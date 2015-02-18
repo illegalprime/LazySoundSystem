@@ -7,7 +7,40 @@ var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
 router.post('/', function(req, res, next) {
-    res.redirect('/dj/' + req.body.name);
+    if (req.body.name) {
+        doesQueueExist(req.body.name, function(snapshot) {
+            if (snapshot.val()) {
+                res.redirect('/dj/' + req.body.name);
+            } else {
+                res.redirect('/dj/new/'+req.body.name);
+            }
+        });
+    } else {
+        res.status(405).send("Invalid POST request to /dj/");
+    }
+});
+
+router.get('/new?', function(req, res, next) {
+    res.render('newQueue', { name : req.query.q });
+});
+
+router.get('/new/:id', function(req, res, next) {
+    doesQueueExist(req.params.id, function(snapshot) {
+        if (snapshot.val()) {
+            // this queue already exists, no need to make a new one
+            res.redirect('/dj/'+req.params.id);
+        } else {
+            res.redirect('/dj/new?q='+req.params.id);
+        }
+    })
+});
+
+router.post('/new', function(req, res, next) {
+    var queueName = req.body.name;
+    // TODO add err catcher
+    addQueue(queueName, function(key) {
+        res.redirect('/dj/'+queueName);
+    });
 });
 
 router.get('/:id', function(req, res, next) {
@@ -15,12 +48,13 @@ router.get('/:id', function(req, res, next) {
     // send user token etc etc
     var queueName = req.params.id;
 
-    queueExists(queueName, function(snapshot) {
+    doesQueueExist(queueName, function(snapshot) {
         var key = snapshot.val();
         // Check if the queue exists already
         if (!key) {
             // Queue does not exist, add a new one!
-            key = addQueue(queueName);
+            key = addQueue(queueName); // this line doesn't work because async
+            // TODO redirect to "make new queue page"
         }
         res.render('queue', {
             id:    queueName,
@@ -118,7 +152,7 @@ var authenticate = function(id, user, callback) {
     callback(false);
 }
 
-var addQueue = function(name) {
+var addQueue = function(name, callback) {
     /*
     TODO: Add CAPTCHA Functionality
     */
@@ -134,10 +168,13 @@ var addQueue = function(name) {
     nameEntry[name] = newQueue.key();
     names.update(nameEntry);
 
+    // TODO I (Andrew) just added this ad-hoc... review needed
+    callback(newQueue.key());
+
     return newQueue.key();
 }
 
-var queueExists = function(name, callback) {
+var doesQueueExist = function(name, callback) {
     var names = fb.child('names');
     names.child(name).once('value', callback);
 }
