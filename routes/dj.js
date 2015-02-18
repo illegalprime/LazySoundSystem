@@ -164,21 +164,20 @@ var vote = function(value, data, callback) {
                 newVote = {};
                 newVote[data.user] = value;
 
-                if (vSnap.val()) votes.update(newVote);
-                else             votes.set(newVote);
-
                 if (!value) {
                     votes.child(data.user).once('value', function(uSnap) {
-                        // TODO: This is always null, why?
-                        console.log(uSnap.val());
                         if (uSnap.val()) {
                             song.setPriority(sSnap.getPriority() - uSnap.val());
+                            votes.update(newVote);
                             callback(false);
                         }
                         else callback(true);
                     });
                 }
                 else {
+                    if (vSnap.val()) votes.update(newVote);
+                    else             votes.set(newVote);
+
                     song.setPriority(sSnap.getPriority() + value);
                     callback(false);
                 }
@@ -192,7 +191,7 @@ var calls = {
     'add':      addSong,
     'upvote':   vote.bind(undefined,  1),  // Should be Sync!
     'downvote': vote.bind(undefined, -1),
-    'unvote':   vote.bind(undefined,  null),
+    'unvote':   vote.bind(undefined,  null)
     // 'veto': remove
 };
 var synccalls  = {
