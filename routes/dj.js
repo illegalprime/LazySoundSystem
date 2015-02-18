@@ -92,8 +92,10 @@ router.get('/:id', function(req, res, next) {
 //     }
 // }
 router.post('/:id/action/:action', function(req, res) {
-    var id     = req.params.id;
     var action = req.params.action;
+    var data   = req.body;
+    data.name  = req.params.id;
+
     // if (synccalls[action] !== null) {
     //     var serialize = firequeues[id];
     //
@@ -115,7 +117,7 @@ router.post('/:id/action/:action', function(req, res) {
     //     calls[action](req.body);
     //     res.send("OK");
     // }
-    calls[action](req.body, function(error) {
+    calls[action](data, function(error) {
         if (error) {
             res.status(500).send("Error");
         }
@@ -166,21 +168,62 @@ var addSong = function(data, callback) {
 }
 
 // API for upvoting a song:
-var upvote = function(data, callback) {
+// Rest: localhost:3000/dj/Michael/action/unvote
+//       localhost:3000/dj/Michael/action/upvote
+//       localhost:3000/dj/Michael/action/downvote
+// Data:
+// {
+//     "queueID": "-JiSZLt18d9C5zmpQDBw",
+//     "songID":  "-JiSa8KGapFRM7fb2nIX",
+//     "user":    "lol"
+// }
+var vote = function(value, data, callback) {
     if (!data.queueID || !data.songID || !data.user) {
-        callback(false);
+        callback(true);
     }
 
     var song  = fb.child('queues/' + data.queueID + '/' + data.songID);
     var votes = song.child('votes');
+
+    song.once('value', function(sSnap) {
+        if (sSnap.val()) {
+            votes.once('value', function(vSnap) {
+                newVote = {};
+                newVote[data.user] = value;
+
+                if (vSnap.val()) votes.update(newVote);
+                else             votes.set(newVote);
+
+                if (!value) {
+                    votes.child(data.user).once('value', function(uSnap) {
+                        // TODO: This is always null, why?
+                        console.log(uSnap.val());
+                        if (uSnap.val()) {
+                            song.setPriority(sSnap.getPriority() - uSnap.val());
+                            callback(false);
+                        }
+                        else callback(true);
+                    });
+                }
+                else {
+                    song.setPriority(sSnap.getPriority() + value);
+                    callback(false);
+                }
+            });
+        }
+        else callback(true);
+    });
 }
 
 var calls = {
-    'add':  addSong
+    'add':      addSong,
+    'upvote':   vote.bind(undefined,  1),  // Should be Sync!
+    'downvote': vote.bind(undefined, -1),
+    'unvote':   vote.bind(undefined,  null),
     // 'veto': remove
 };
 var synccalls  = {
-    'upvote':   upvote,
+    // 'upvote':   upvote,
     // 'downvote': downvote
 };
 
