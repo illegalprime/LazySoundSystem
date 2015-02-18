@@ -203,9 +203,41 @@ var authenticate = function(id, user, callback) {
     callback(false);
 }
 
-var cleanFirebase = function(queueID) {
+var removeQueue = function(metaID) {
+    // var removeMeta = {};
+    // var removeMeta[metaID] = null;
+    //
+    // fb.child('metaqueues/' + metaID).once('value', function(snap) {
+    //     var removeName  = {};
+    //     var removeQueue = {};
+    //     removeName[snap.val()['name']]      = null;
+    //     removeQueue[snap.val()['queue-id']] = null;
+    //
+    //     fb.child('names').set(removeName);
+    //     fb.child('queues').set(removeQueue);
+    // });
+    // fb.child('metaqueues').set(removeMeta);
 }
-// cleanFirebase();
+
+var cleanFirebase = function() {
+    var oldestQueue = fb.child('metaqueues').orderByChild('expiration').limitToFirst(1);
+
+    oldestQueue.once('value', function(snap) {
+        var queue = snap.val();
+        for (key in queue) {
+            var diff = queue[key].expiration - (new Date().getTime());
+            if (diff < 100) {
+                diff = 100;
+            }
+            setTimeout(function() {
+                removeQueue(key);
+                cleanFirebase();
+            }, diff);
+            return;
+        }
+    });
+}
+cleanFirebase();
 
 // spotify api search redirect is still in `index.js`
 
