@@ -21,7 +21,7 @@ router.post('/', function(req, res, next) {
 });
 
 router.get('/new?', function(req, res, next) {
-    doesQueueExist(req.params.id, function(snapshot) {
+    doesQueueExist(req.query.q, function(snapshot) {
         if (snapshot.val()) {
             // this queue already exists, no need to make a new one
             res.redirect('/dj/'+req.query.q);
