@@ -3,14 +3,15 @@ var Queue   = require('queue');
 var Firebase = require('firebase');
 var router = express.Router();
 
+var newQueue = require('./dj/new.js');
+var utils = require('./dj/utils.js');
+
 var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
-var oneDay = 86400000;
-
 router.post('/', function(req, res, next) {
     if (req.body.name) {
-        doesQueueExist(req.body.name, function(snapshot) {
+        utils.doesQueueExist(fb, req.body.name, function(snapshot) {
             if (snapshot.val()) {
                 res.redirect('/dj/' + req.body.name);
             } else {
@@ -22,37 +23,14 @@ router.post('/', function(req, res, next) {
     }
 });
 
-router.get('/new?', function(req, res, next) {
-    doesQueueExist(req.query.q, function(snapshot) {
-        if (snapshot.val()) {
-            // this queue already exists, no need to make a new one
-            res.redirect('/dj/'+req.query.q);
-        } else {
-            res.render('newQueue', { name : req.query.q });
-        }
-    });
-});
-
-// TODO slowly deprecating this
-router.get('/new/:id', function(req, res, next) {
-    res.redirect('/dj/new?q='+req.params.id);
-});
-
-// TODO form validation here
-router.post('/new', function(req, res, next) {
-    var queueName = req.body.name;
-    // TODO add err catcher
-    addQueue(queueName, function(key) {
-        res.redirect('/dj/'+queueName);
-    });
-});
+router.use('/new*', newQueue);
 
 router.get('/:id', function(req, res, next) {
     // TODO check if queues exist/are password protected
     // send user token etc etc
     var queueName = req.params.id;
 
-    doesQueueExist(queueName, function(snapshot) {
+    utils.doesQueueExist(fb, queueName, function(snapshot) {
         var key = snapshot.val();
         // Check if the queue exists already
         if (!key) {
@@ -126,11 +104,6 @@ router.post('/:id/action/:action', function(req, res) {
         }
     });
 });
-
-var consumeError = function(error) {
-    if (error) console.log('Data could not be saved.' + error);
-    else       console.log('Data saved successfully.');
-}
 
 // API for adding a song:
 // {
@@ -229,39 +202,6 @@ var synccalls  = {
 
 var authenticate = function(id, user, callback) {
     callback(false);
-}
-
-var addQueue = function(name, callback) {
-    /*
-    TODO: Add CAPTCHA Functionality
-    */
-    var names  = fb.child('names');
-    var metas  = fb.child('metaqueues');
-    var queues = fb.child('queues');
-
-    var newQueue = queues.push({
-        'filler': true
-    });
-
-    var newMetaQueue = metas.push({
-        'name':  name,
-        'expiration': (new Date().getTime()) + oneDay,
-        'queue-id': newQueue.key(),
-    }, consumeError);
-
-    var nameEntry = {};
-    nameEntry[name] = newMetaQueue.key();
-    names.update(nameEntry);
-
-    // TODO I (Andrew) just added this ad-hoc... review needed
-    callback(newQueue.key());
-
-    return newQueue.key();
-}
-
-var doesQueueExist = function(name, callback) {
-    var names = fb.child('names');
-    names.child(name).once('value', callback);
 }
 
 var cleanFirebase = function(queueID) {
