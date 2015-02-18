@@ -6,6 +6,8 @@ var router = express.Router();
 var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
+var oneDay = 86400000;
+
 router.post('/', function(req, res, next) {
     if (req.body.name) {
         doesQueueExist(req.body.name, function(snapshot) {
@@ -113,7 +115,14 @@ router.post('/:id/action/:action', function(req, res) {
     //     calls[action](req.body);
     //     res.send("OK");
     // }
-    calls[action](req.body);
+    calls[action](req.body, function(error) {
+        if (error) {
+            res.status(500).send("Error");
+        }
+        else {
+            res.send("OK");
+        }
+    });
 });
 
 var consumeError = function(error) {
@@ -121,27 +130,36 @@ var consumeError = function(error) {
     else       console.log('Data saved successfully.');
 }
 
-var add = function(queue, data) {
-    console.log("Called Add Song!");
-    // queue.push({
-    //     'priority' : 0,
-    //     'votes'    : {},
-    //     'song': {
-    //         'artist' : data.artist,
-    //         'album'  : data.album,
-    //         'name'   : data.name,
-    //         'cover'  : data.cover,
-    //         'stream' : data.stream
-    //     }
-    // }, error);
+var addSong = function(data, callback) {
+    if (!data.queueID || !data.song) {
+        return false;
+    }
+
+    var song  = data.song;
+    var queue = fb.child('queues/' + data.queueID);
+
+    var newSong = queue.push({
+        'song': {
+            'artist' : song.artist,
+            'album'  : song.album,
+            'name'   : song.name,
+            'cover'  : song.cover,
+            'stream' : song.stream
+        }
+    }, function(error) {
+        if (!error) {
+            queue.child(newSong.key()).setPriority(0);
+        }
+        callback(error);
+    });
 }
 
-var upvote = function(queue, data, user) {
-    queue.child()
+var upvote = function(data, callback) {
+    // fb.child('');
 }
 
 var calls = {
-    'add':  add
+    'add':  addSong
     // 'veto': remove
 };
 var synccalls  = {
@@ -157,16 +175,22 @@ var addQueue = function(name, callback) {
     /*
     TODO: Add CAPTCHA Functionality
     */
-    var names = fb.child('names');
+    var names  = fb.child('names');
+    var metas  = fb.child('metaqueues');
     var queues = fb.child('queues');
 
     var newQueue = queues.push({
+        'filler': true
+    });
+
+    var newMetaQueue = metas.push({
         'name':  name,
-        'songs': {}
+        'expiration': (new Date().getTime()) + oneDay,
+        'queue-id': newQueue.key(),
     }, consumeError);
 
     var nameEntry = {};
-    nameEntry[name] = newQueue.key();
+    nameEntry[name] = newMetaQueue.key();
     names.update(nameEntry);
 
     // TODO I (Andrew) just added this ad-hoc... review needed
@@ -179,6 +203,10 @@ var doesQueueExist = function(name, callback) {
     var names = fb.child('names');
     names.child(name).once('value', callback);
 }
+
+var cleanFirebase = function(queueID) {
+}
+// cleanFirebase();
 
 // spotify api search redirect is still in `index.js`
 
