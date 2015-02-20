@@ -192,9 +192,13 @@ var vote = function(value, data, callback) {
     });
 }
 
+var removeSong = function(data, callback) {
+    callback(false);
+}
+
 var calls = {
-    'add':      addSong
-    // 'veto': remove
+    'add':  addSong,
+    'veto': removeSong
 };
 var synccalls  = {
     'upvote':   vote.bind(undefined,  1),
@@ -210,7 +214,8 @@ var removeQueue = function(metaID) {
     fb.child('metaqueues/' + metaID).once('value', function(snap) {
         var removeName  = {};
         var removeQueue = {};
-        var removeMeta = {};
+        var removeMeta  = {};
+        var removeVotes = {};
         removeName[snap.val()['name']]      = null;
         removeQueue[snap.val()['queue-id']] = null;
         removeMeta[metaID] = null;
@@ -218,6 +223,7 @@ var removeQueue = function(metaID) {
         fb.child('queues').update(removeQueue);
         fb.child('names').update(removeName);
         fb.child('metaqueues').update(removeMeta);
+        fb.child('votes').update(removeQueue);
     });
 }
 
