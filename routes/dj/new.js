@@ -47,13 +47,11 @@ var addQueue = function(name, callback) {
     var metas  = fb.child('metaqueues');
     var queues = fb.child('queues');
 
-    var oneDay = 86400000;
-
     var newQueue = queues.push({});
 
     var newMetaQueue = metas.push({
         'name':  name,
-        'expiration': (new Date().getTime()) + oneDay,
+        'expiration': (new Date().getTime()) + utils.oneDay,
         'queue-id': newQueue.key(),
     }, utils.consumeError);
 

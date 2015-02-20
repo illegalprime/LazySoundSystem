@@ -165,23 +165,20 @@ var vote = function(value, data, callback) {
 
     song.once('value', function(sSnap) {
         if (sSnap.val()) {
-            votes.once('value', function(vSnap) {
-                newVote = {};
-                newVote[data.user] = value;
-
-                if (!value) {
-                    votes.child(data.user).once('value', function(uSnap) {
-                        if (uSnap.val()) {
-                            song.setPriority(sSnap.getPriority() - uSnap.val());
-                            votes.update(newVote);
-                            callback(false);
-                        }
-                        else callback(true);
-                    });
+            votes.child(data.user).once('value', function(uSnap) {
+                if (uSnap.val() == value) {
+                    // User already voted
+                    callback(true);
                 }
                 else {
-                    if (vSnap.val()) votes.update(newVote);
-                    else             votes.set(newVote);
+                    newVote = {};
+                    newVote[data.user] = value;
+
+                    if (!value) {
+                        // User is un-voting
+                        value = -uSnap.val();
+                    }
+                    votes.update(newVote);
 
                     song.setPriority(sSnap.getPriority() + value);
                     callback(false);
@@ -227,7 +224,7 @@ var authenticate = function(id, user, callback) {
     callback(false);
 }
 
-var removeQueue = function(metaID) {
+var removeQueue = function(metaID, finish) {
     fb.child('metaqueues/' + metaID).once('value', function(snap) {
         var removeName  = {};
         var removeQueue = {};
@@ -241,26 +238,40 @@ var removeQueue = function(metaID) {
         fb.child('names').update(removeName);
         fb.child('metaqueues').update(removeMeta);
         fb.child('votes').update(removeQueue);
+        finish();
     });
 }
 
 var cleanFirebase = function() {
-    var oldestQueue = fb.child('metaqueues').orderByChild('expiration').limitToFirst(1);
+    var oldestQueues = fb.child('metaqueues').orderByChild('expiration');
 
-    oldestQueue.once('value', function(snap) {
-        var queue = snap.val();
-        for (key in queue) {
-            var diff = queue[key].expiration - (new Date().getTime());
+    oldestQueues.once('value', function(snap) {
+        var queues = snap.val();
+        var diff     = utils.oneDay;
+        var total    = 0;
+        var finished = 0;
+
+        var resweep = function(wait) {
+            wait += 100;
+            console.log('Time until next sweep: ' + wait + 'ms');
+            setTimeout(cleanFirebase, wait);
+        };
+
+        for (key in queues) {
+            diff = queues[key].expiration - (new Date().getTime());
+            ++total;
+
             if (diff < 100) {
-                diff = 100;
+                removeQueue(key, function() {
+                    if (++finished == total) {
+                        resweep(diff);
+                    }
+                });
             }
-            console.log('Time until next sweep: ' + diff + 'ms');
-            setTimeout(function() {
-                removeQueue(key);
-                cleanFirebase();
-            }, diff);
-            return;
+            else break;
         }
+
+        resweep(diff);
     });
 }
 cleanFirebase();

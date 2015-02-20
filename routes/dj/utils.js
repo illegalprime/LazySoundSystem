@@ -7,5 +7,7 @@ module.exports = {
     doesQueueExist : function(fb, name, callback) {
         var names = fb.child('names');
         names.child(name).once('value', callback);
-    }
+    },
+
+    oneDay: 86400000
 }
