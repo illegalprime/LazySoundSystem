@@ -1,8 +1,13 @@
 <h1>Create-a-queue!</h1>
 <p>So, funny story, there is no queue named {{{name}}}.
     would you like to make one?</p>
-<form action="/dj/new" method="POST">
-    <input type="text" name="name" autocomplete="off" value="{{{name}}}">
+
+<p class="warning" id="illegalChars" hidden>WARNING! Only uppercase, lowercase,
+    underscore and dash characters are allowed!</p>
+
+<form id="queueInfo" onsubmit="checkForm()" method="POST" action="/dj/new">
+    <input type="text" name="name" id="name" autocomplete="off" value="{{{name}}}">
     <input type="submit" value="GO!">
 </form>
 <!-- gather other information here, validate, captcha, auth etc -->
+<script src="/javascripts/newqueue.js"></script>
