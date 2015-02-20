@@ -49,9 +49,7 @@ var addQueue = function(name, callback) {
 
     var oneDay = 86400000;
 
-    var newQueue = queues.push({
-        'filler': true
-    });
+    var newQueue = queues.push({});
 
     var newMetaQueue = metas.push({
         'name':  name,

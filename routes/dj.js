@@ -156,7 +156,7 @@ var vote = function(value, data, callback) {
     }
 
     var song  = fb.child('queues/' + data.queueID + '/' + data.songID);
-    var votes = song.child('votes');
+    var votes = fb.child('queues/' + data.queueID + '/' + data.songID);
 
     song.once('value', function(sSnap) {
         if (sSnap.val()) {
@@ -228,7 +228,7 @@ var cleanFirebase = function() {
             if (diff < 100) {
                 diff = 100;
             }
-            console.log('Time until next sweep: ' + diff);
+            console.log('Time until next sweep: ' + diff + 'ms');
             setTimeout(function() {
                 removeQueue(key);
                 cleanFirebase();
