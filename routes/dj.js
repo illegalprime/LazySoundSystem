@@ -204,19 +204,18 @@ var authenticate = function(id, user, callback) {
 }
 
 var removeQueue = function(metaID) {
-    // var removeMeta = {};
-    // var removeMeta[metaID] = null;
-    //
-    // fb.child('metaqueues/' + metaID).once('value', function(snap) {
-    //     var removeName  = {};
-    //     var removeQueue = {};
-    //     removeName[snap.val()['name']]      = null;
-    //     removeQueue[snap.val()['queue-id']] = null;
-    //
-    //     fb.child('names').set(removeName);
-    //     fb.child('queues').set(removeQueue);
-    // });
-    // fb.child('metaqueues').set(removeMeta);
+    fb.child('metaqueues/' + metaID).once('value', function(snap) {
+        var removeName  = {};
+        var removeQueue = {};
+        var removeMeta = {};
+        removeName[snap.val()['name']]      = null;
+        removeQueue[snap.val()['queue-id']] = null;
+        removeMeta[metaID] = null;
+
+        fb.child('queues').update(removeQueue);
+        fb.child('names').update(removeName);
+        fb.child('metaqueues').update(removeMeta);
+    });
 }
 
 var cleanFirebase = function() {
@@ -229,6 +228,7 @@ var cleanFirebase = function() {
             if (diff < 100) {
                 diff = 100;
             }
+            console.log('Time until next sweep: ' + diff);
             setTimeout(function() {
                 removeQueue(key);
                 cleanFirebase();
