@@ -72,37 +72,42 @@ router.get('/:id', function(req, res, next) {
 router.post('/:id/action/:action', function(req, res) {
     var action = req.params.action;
     var data   = req.body;
-    data.name  = req.params.id;
+    var id     = req.params.id;
+    data.name  = id;
 
-    // if (synccalls[action] !== null) {
-    //     var serialize = firequeues[id];
-    //
-    //     if (serialize == undefined) {
-    //         firequeues[id] = new Queue();
-    //         serialize = firequeues[id];
-    //     }
-    //     serialize.push(function(cb) {
-    //         synccalls[action](req.body);
-    //         res.send("OK");
-    //         cb();
-    //     });
-    //
-    //     if (!serialize.running) {
-    //         serialize.start();
-    //     }
-    // }
-    // else {
-    //     calls[action](req.body);
-    //     res.send("OK");
-    // }
-    calls[action](data, function(error) {
-        if (error) {
-            res.status(500).send("Error");
+    if (synccalls[action]) {
+        var serialize = firequeues[id];
+
+        if (serialize == undefined) {
+            firequeues[id] = new Queue();
+            serialize = firequeues[id];
         }
-        else {
-            res.send("OK");
+        serialize.push(function(cb) {
+            synccalls[action](data, function(error) {
+                if (error) {
+                    res.status(500).send("Error");
+                }
+                else {
+                    res.send("OK");
+                }
+            });
+            cb();
+        });
+
+        if (!serialize.running) {
+            serialize.start();
         }
-    });
+    }
+    else {
+        calls[action](data, function(error) {
+            if (error) {
+                res.status(500).send("Error");
+            }
+            else {
+                res.send("OK");
+            }
+        });
+    }
 });
 
 // API for adding a song:
@@ -188,15 +193,13 @@ var vote = function(value, data, callback) {
 }
 
 var calls = {
-    'add':      addSong,
-    'upvote':   vote.bind(undefined,  1),  // Should be Sync!
-    'downvote': vote.bind(undefined, -1),
-    'unvote':   vote.bind(undefined,  null)
+    'add':      addSong
     // 'veto': remove
 };
 var synccalls  = {
-    // 'upvote':   upvote,
-    // 'downvote': downvote
+    'upvote':   vote.bind(undefined,  1),
+    'downvote': vote.bind(undefined, -1),
+    'unvote':   vote.bind(undefined,  null)
 };
 
 var authenticate = function(id, user, callback) {
