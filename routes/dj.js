@@ -74,6 +74,15 @@ router.post('/:id/action/:action', function(req, res) {
     var id     = req.params.id;
     data.name  = id;
 
+    var respond = function(error) {
+        if (error) {
+            res.status(500).send("Error");
+        }
+        else {
+            res.send("OK");
+        }
+    }
+
     if (synccalls[action]) {
         var serialize = firequeues[id];
 
@@ -82,14 +91,7 @@ router.post('/:id/action/:action', function(req, res) {
             serialize = firequeues[id];
         }
         serialize.push(function(cb) {
-            synccalls[action](data, function(error) {
-                if (error) {
-                    res.status(500).send("Error");
-                }
-                else {
-                    res.send("OK");
-                }
-            });
+            synccalls[action](data, respond);
             cb();
         });
 
@@ -98,14 +100,7 @@ router.post('/:id/action/:action', function(req, res) {
         }
     }
     else {
-        calls[action](data, function(error) {
-            if (error) {
-                res.status(500).send("Error");
-            }
-            else {
-                res.send("OK");
-            }
-        });
+        calls[action](data, respond);
     }
 });
 
