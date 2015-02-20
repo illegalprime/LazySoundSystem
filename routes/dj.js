@@ -54,8 +54,7 @@ router.get('/:id', function(req, res, next) {
 // });
 
 // Requests are of this form:
-// GET /action/:action
-//
+// Rest: localhost:3000/dj/<id>/action/<action>
 // Request Body (Elements exist if applicable):
 // {
 //     'userKey': '-Ji756Q4yxaqR8R3iq53'
@@ -111,6 +110,7 @@ router.post('/:id/action/:action', function(req, res) {
 });
 
 // API for adding a song:
+// Rest: localhost:3000/dj/<id>/action/add
 // {
 //     "queueID": "-JiSZLt18d9C5zmpQDBw",
 //     "song": {
@@ -146,9 +146,9 @@ var addSong = function(data, callback) {
 }
 
 // API for upvoting a song:
-// Rest: localhost:3000/dj/Michael/action/unvote
-//       localhost:3000/dj/Michael/action/upvote
-//       localhost:3000/dj/Michael/action/downvote
+// Rest: localhost:3000/dj/<id>/action/unvote
+//       localhost:3000/dj/<id>/action/upvote
+//       localhost:3000/dj/<id>/action/downvote
 // Data:
 // {
 //     "queueID": "-JiSZLt18d9C5zmpQDBw",
@@ -192,8 +192,25 @@ var vote = function(value, data, callback) {
     });
 }
 
+// API for upvoting a song:
+// Rest: localhost:3000/dj/<id>/action/veto
+// Data:
+// {
+//     "queueID": "-JiSZLt18d9C5zmpQDBw",
+//     "songID":  "-JiSa8KGapFRM7fb2nIX",
+//     "user":    "lol"
+// }
 var removeSong = function(data, callback) {
-    callback(false);
+    if (!data || !data.songID || !data.queueID || !data.user) {
+        callback(true);
+    }
+
+    var removeSong = {};
+    removeSong[data.songID] = null;
+
+    fb.child('queues').child(data.queueID).update(removeSong, function(err) {
+        callback(err);
+    });
 }
 
 var calls = {
