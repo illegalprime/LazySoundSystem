@@ -7,7 +7,8 @@ A system for allowing multiple unauthenticated users nearby to control and queue
  - Spotify API Search is exposed to the front end
 
 ## What there is to do:
- - Queue to manage songs that is based on user votes
+ - Queue to manage songs that is based on user votes. DONE!
+ - Restructure the database to remove the voting users from the queue.
  - Veto-ing system
  - Better UI
  - Apps to be able to share music with music apps
