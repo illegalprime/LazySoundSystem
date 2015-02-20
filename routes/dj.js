@@ -156,7 +156,7 @@ var vote = function(value, data, callback) {
     }
 
     var song  = fb.child('queues/' + data.queueID + '/' + data.songID);
-    var votes = fb.child('queues/' + data.queueID + '/' + data.songID);
+    var votes = fb.child('votes/'  + data.queueID + '/' + data.songID);
 
     song.once('value', function(sSnap) {
         if (sSnap.val()) {
