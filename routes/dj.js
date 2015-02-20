@@ -9,6 +9,18 @@ var utils = require('./dj/utils.js');
 var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
+router.all('/*', function(req, res, next) {
+    console.log("all seeing auth");
+    if (fb.getAuth()) {
+        console.log(fb.getAuth());
+        res.cookie('userID', "" + fb.getAuth().uid+"", {signed: true});
+        return next();
+    }
+
+    authAnon();
+    return next();
+})
+
 router.post('/', function(req, res, next) {
     if (req.body.name) {
         utils.doesQueueExist(fb, req.body.name, function(snapshot) {
@@ -29,7 +41,7 @@ router.get('/:id', function(req, res, next) {
     // TODO check if queues exist/are password protected
     // send user token etc etc
     var queueName = req.params.id;
-
+    console.log("this be cookie   " + req.signedCookies['userID']);
     utils.doesQueueExist(fb, queueName, function(snapshot) {
         var key = snapshot.val();
         // Check if the queue exists already
@@ -37,11 +49,12 @@ router.get('/:id', function(req, res, next) {
             // Queue does not exist, add a new one!
             res.redirect('/dj/new?q='+queueName);
         }
+
         res.render('queue', {
             id:    queueName,
             hbs:   true,
             key: key
-        });
+        })  ;
     });
 });
 
@@ -218,6 +231,27 @@ var removeQueue = function(metaID) {
     // });
     // fb.child('metaqueues').set(removeMeta);
 }
+
+var authAnon = function() {
+    fb.authAnonymously(function(error, authData) {
+        if (error) {
+            console.log("Login Failed!", error);
+        } else {
+            console.log("Authenticated successfully with payload:", authData);
+        }
+    } );
+}
+
+var authUser = function() {
+    fb.authAnonymously(function(error, authData) {
+        if (error) {
+            console.log("Login Failed!", error);
+        } else {
+            console.log("Authenticated successfully with payload:", authData);
+        }
+    } );
+}
+
 
 var cleanFirebase = function() {
     var oldestQueue = fb.child('metaqueues').orderByChild('expiration').limitToFirst(1);
