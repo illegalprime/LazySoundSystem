@@ -10,15 +10,16 @@ var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
 router.all('/*', function(req, res, next) {
-    console.log("all seeing auth");
+    console.log("big brother is watching");
     if (fb.getAuth()) {
         console.log(fb.getAuth());
         res.cookie('userID', "" + fb.getAuth().uid+"", {signed: true});
         return next();
     }
-
     authAnon();
-    return next();
+    //get that weak shit outta here
+    //redirects to home post auth
+    return res.redirect('back');
 })
 
 router.post('/', function(req, res, next) {
@@ -42,21 +43,23 @@ router.get('/:id', function(req, res, next) {
     // send user token etc etc
     var queueName = req.params.id;
     console.log("this be cookie   " + req.signedCookies['userID']);
-    utils.doesQueueExist(fb, queueName, function(snapshot) {
-        var key = snapshot.val();
+    fb.child('names').child(queueName).once('value', function(snap) {
+        var key = snap.val();
+        res.cookie('' + snap.val(), ''+  req.signedCookies['userID'], {signed: true});
+        res.cookie('' + queueName, ''+  snap.val(), {signed: true});
         // Check if the queue exists already
         if (!key) {
             // Queue does not exist, add a new one!
             res.redirect('/dj/new?q='+queueName);
         }
 
-        res.render('queue', {
-            id:    queueName,
-            hbs:   true,
-            key: key
-        })  ;
+            res.render('queue', {
+                id:    queueName,
+                hbs:   true,
+                key: key
+            });
+        });
     });
-});
 
 // router.get('/:id/:user/', function(req, res, next) {
 //     authenticate(req.params.id, req.params.user, function(authenticated) {
@@ -86,6 +89,21 @@ router.post('/:id/action/:action', function(req, res) {
     var data   = req.body;
     var id     = req.params.id;
     data.name  = id;
+    data.user = req.signedCookies['userID'];
+    data.queueID = req.signedCookies['' + req.params.id];
+    console.log("this be cookie   " + data.user);
+    console.log("this be cookie   " + data.queueID);
+
+    data.song = {
+        "artist": "The Dandy Warhols2",
+        "album":  "Thirteen Tales From Urban Bohemia",
+        "name":   "Bohemian Like You",
+        "cover":  "https://images.juno.co.uk/full/CS1863225-02A-BIG.jpg",
+        "stream": "https://play.spotify.com/track/7jA4agDnt1Oc6Fn2hifX0t?play=true&utm_source=open.spotify.com&utm_medium=open"
+    }
+
+console.log("this be song   " + data.song);
+
 
     var respond = function(error) {
         if (error) {
@@ -133,7 +151,6 @@ var addSong = function(data, callback) {
     if (!data.queueID || !data.song) {
         callback(false);
     }
-
     var song  = data.song;
     var queue = fb.child('queues/' + data.queueID);
 
@@ -256,6 +273,7 @@ var authAnon = function() {
             console.log("Login Failed!", error);
         } else {
             console.log("Authenticated successfully with payload:", authData);
+
         }
     } );
 }
