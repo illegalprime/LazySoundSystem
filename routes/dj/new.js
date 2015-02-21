@@ -4,7 +4,7 @@ var Firebase = require('firebase');
 
 var utils = require('./utils.js');
 
-var fb = new Firebase('https://lazysound.firebaseio.com/');
+var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
 
 router.get('/?', function(req, res, next) {
     utils.doesQueueExist(fb, req.query.q, function(snapshot) {
@@ -17,11 +17,6 @@ router.get('/?', function(req, res, next) {
     });
 });
 
-// TODO slowly deprecating this
-router.get('/:id', function(req, res, next) {
-    res.redirect('/dj/new?q='+req.params.id);
-});
-
 // TODO form validation here
 // receive ajax requests from client-side (after client-side validation)
 // if the data is valid then create queue and redirect to the proper
@@ -30,22 +25,50 @@ router.get('/:id', function(req, res, next) {
 // TODO block or reject regular post requests? we probably could just
 // treat all post requests the same?
 router.post('/', function(req, res, next) {
-    // req.xhr will be a boolean indicating if the request is ajax
-    var queueName = req.body.name;
-    // TODO add err catcher
-    addQueue(queueName, function(key) {
-        res.redirect('/dj/'+queueName);
-    });
+    var queueName = req.body.name.toLowerCase();
+    var illegalChars = new RegExp("[^A-Za-z0-9-_]", "g");
+
+    if (!illegalChars.exec(queueName) || queueName === "new") {
+        // valid (no illegal characters) name
+        utils.doesQueueExist(fb, queueName, function(snapshot) {
+            // if this name is not already taken
+            if (!snapshot.val()) {
+                addQueue({ name: queueName }, function(key) {
+                    res.redirect('/dj/' + queueName);
+                });
+            } else {
+                res.json({
+                    name: "Sorry there is already a queue with this name.",
+                    duplicateName: true
+                });
+            }
+        });
+    } else {
+        res.json({
+            name: "Invalid characters in the name.",
+            illegalChars: true
+        });
+    }
 });
 
-
-var addQueue = function(name, callback) {
-    /*
-    TODO: Add CAPTCHA Functionality
-    */
+/**
+ * Adds a queue with a certain name to Firebase.
+ * TODO: fully implement the error system
+ *
+ * @param name (String) of the new queue
+ * @param callback (Function) called upon successful addition to Firebase
+ *      `callback` is supplied with a String with the new queue's "id".
+ * @param error (Function) called when something fails (hopefully with an error)
+ *      `error` is supplied with an Object that describes the error.
+ *      TODO The keys of the Object coorespond with the keys in the new queue
+ *      that caused the error.
+ */
+var addQueue = function(params, callback, error) {
     var names  = fb.child('names');
     var metas  = fb.child('metaqueues');
     var queues = fb.child('queues');
+
+    var name = params.name;
 
     var oneDay = 86400000;
 
@@ -63,7 +86,6 @@ var addQueue = function(name, callback) {
     nameEntry[name] = newMetaQueue.key();
     names.update(nameEntry);
 
-    // TODO I (Andrew) just added this ad-hoc... review needed
     callback(newQueue.key());
 
     return newQueue.key();

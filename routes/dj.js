@@ -6,7 +6,7 @@ var router = express.Router();
 var newQueue = require('./dj/new.js');
 var utils = require('./dj/utils.js');
 
-var fb = new Firebase('https://lazysound.firebaseio.com/');
+var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
 var firequeues = {};
 
 router.post('/', function(req, res, next) {
@@ -36,12 +36,14 @@ router.get('/:id', function(req, res, next) {
         if (!key) {
             // Queue does not exist, add a new one!
             res.redirect('/dj/new?q='+queueName);
+            return;
+        } else {
+            res.render('queue', {
+                id:    queueName,
+                hbs:   true,
+                key: key
+            });
         }
-        res.render('queue', {
-            id:    queueName,
-            hbs:   true,
-            key: key
-        });
     });
 });
 
