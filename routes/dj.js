@@ -93,18 +93,6 @@ router.post('/:id/action/:action', function(req, res) {
     data.queueID = req.signedCookies['' + req.params.id];
     console.log("this be cookie   " + data.user);
     console.log("this be cookie   " + data.queueID);
-
-    data.song = {
-        "artist": "The Dandy Warhols2",
-        "album":  "Thirteen Tales From Urban Bohemia",
-        "name":   "Bohemian Like You",
-        "cover":  "https://images.juno.co.uk/full/CS1863225-02A-BIG.jpg",
-        "stream": "https://play.spotify.com/track/7jA4agDnt1Oc6Fn2hifX0t?play=true&utm_source=open.spotify.com&utm_medium=open"
-    }
-
-console.log("this be song   " + data.song);
-
-
     var respond = function(error) {
         if (error) {
             res.status(500).send("Error");
