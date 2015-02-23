@@ -3,27 +3,24 @@ var Queue   = require('queue');
 var Firebase = require('firebase');
 var router = express.Router();
 
-var newQueue = require('./dj/new.js');
 var utils = require('./dj/utils.js');
 
 var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
 var firequeues = {};
 
-router.post('/', function(req, res, next) {
-    if (req.body.name) {
-        utils.doesQueueExist(fb, req.body.name, function(snapshot) {
-            if (snapshot.val()) {
-                res.redirect('/dj/' + req.body.name);
-            } else {
-                res.redirect('/dj/new?q='+req.body.name);
-            }
-        });
-    } else {
-        res.status(405).send("Invalid POST request to /dj/");
-    }
-});
+router.get('/', function(req, res, next) {
+    var queueName = req.query.name || "";
 
-router.use('/new*', newQueue);
+    utils.validate(queueName, function(data) {
+        // this queue exist already
+        if (!data.error && !data.unique) {
+            // this queue exist already
+            res.redirect("/dj/" + data.name);
+        } else {
+            res.status(400).json(data.error);
+        }
+    });
+});
 
 router.get('/:id', function(req, res, next) {
     // TODO check if queues exist/are password protected
@@ -35,6 +32,7 @@ router.get('/:id', function(req, res, next) {
         // Check if the queue exists already
         if (!key) {
             // Queue does not exist, add a new one!
+            // TODO 404?!
             res.redirect('/dj/new?q='+queueName);
             return;
         } else {

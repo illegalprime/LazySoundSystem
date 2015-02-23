@@ -1,11 +1,19 @@
 var express = require('express');
 var request = require('request');
 var router  = express.Router();
+var utils   = require('./dj/utils.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'The LazySoundSystem' });
+    res.render('index', { title: 'The LazySoundSystem' });
 });
+
+router.post('/', function(req, res, next) {
+    var name = req.body.name;
+    utils.validate(name, function(result) {
+        res.json(result);
+    });
+})
 
 router.get('/call/spotify/search', function(req, res) {
     searchCall = 'https://api.spotify.com/v1/search';
