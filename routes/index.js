@@ -11,7 +11,17 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
     var name = req.body.name;
     utils.validate(name, function(result) {
-        res.json(result);
+        if (req.xhr || result.error) {
+            res.json(result);
+        } else {
+            if (result.unique === true) {
+                utils.addQueue(name, function() {
+                    res.redirect('/dj/'+name);
+                });
+            } else {
+                res.redirect('/dj/'+name);
+            }
+        }
     });
 })
 
