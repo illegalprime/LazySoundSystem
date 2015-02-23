@@ -15,12 +15,10 @@ var utils = {};
  *      TODO The keys of the Object coorespond with the keys in the new queue
  *      that caused the error.
  */
-utils.addQueue = function(params, callback, error) {
+utils.addQueue = function(name, callback, error) {
     var names  = fb.child('names');
     var metas  = fb.child('metaqueues');
     var queues = fb.child('queues');
-
-    var name = params.name;
 
     var oneDay = 86400000;
 
@@ -51,7 +49,7 @@ utils.consumeError = function(error) {
 utils.doesQueueExist = function(fb, name, callback) {
     var names = fb.child('names');
     names.child(name).once('value', function(snapshot) {
-        callback(!snapshot.val());
+        callback(snapshot);
     });
 };
 
@@ -61,9 +59,9 @@ utils.validate = function(queueName, callback) {
     var result = { name : queueName };
     if (!illegalChars.exec(queueName) && (queueName.length !== 0)) {
         // valid (no illegal characters) name
-        utils.doesQueueExist(fb, queueName, function(exists) {
+        utils.doesQueueExist(fb, queueName, function(snapshot) {
             // if this name is not already taken
-            result.unique = exists;
+            result.unique = !snapshot.val();
             callback(result);
         });
     } else {
