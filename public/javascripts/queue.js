@@ -32,6 +32,7 @@ function searchFor(query, callback) {
             type: 'track',
             limit: 5
         },
+        type: "POST",
         success: function(data) {
             if (query == newestQuery) {
                 callback(JSON.parse(data));

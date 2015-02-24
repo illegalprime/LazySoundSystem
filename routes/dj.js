@@ -3,7 +3,6 @@ var Queue   = require('queue');
 var Firebase = require('firebase');
 var router = express.Router();
 
-var newQueue = require('./dj/new.js');
 var utils = require('./dj/utils.js');
 
 var fb = new Firebase('https://lazysound.firebaseio.com/');
@@ -22,21 +21,19 @@ router.all('/*', function(req, res, next) {
     return res.redirect('back');
 })
 
-router.post('/', function(req, res, next) {
-    if (req.body.name) {
-        utils.doesQueueExist(fb, req.body.name, function(snapshot) {
-            if (snapshot.val()) {
-                res.redirect('/dj/' + req.body.name);
-            } else {
-                res.redirect('/dj/new?q='+req.body.name);
-            }
-        });
-    } else {
-        res.status(405).send("Invalid POST request to /dj/");
-    }
-});
+router.get('/', function(req, res, next) {
+    var queueName = req.query.name || "";
 
-router.use('/new*', newQueue);
+    utils.validate(queueName, function(data) {
+        // this queue exist already
+        if (!data.error && !data.unique) {
+            // this queue exist already
+            res.redirect("/dj/" + data.name);
+        } else {
+            res.status(400).json(data.error);
+        }
+    });
+});
 
 router.get('/:id', function(req, res, next) {
     // TODO check if queues exist/are password protected
@@ -50,16 +47,17 @@ router.get('/:id', function(req, res, next) {
         // Check if the queue exists already
         if (!key) {
             // Queue does not exist, add a new one!
+            // TODO 404?!
             res.redirect('/dj/new?q='+queueName);
-        }
-
+        } else {
             res.render('queue', {
                 id:    queueName,
                 hbs:   true,
                 key: key
             });
-        });
+        }
     });
+});
 
 // router.get('/:id/:user/', function(req, res, next) {
 //     authenticate(req.params.id, req.params.user, function(authenticated) {
@@ -297,6 +295,7 @@ var cleanFirebase = function() {
             ++total;
 
             if (diff < 100) {
+                console.log(" " + diff);
                 removeQueue(key, function() {
                     if (++finished == total) {
                         resweep(diff);
@@ -309,8 +308,6 @@ var cleanFirebase = function() {
         resweep(diff);
     });
 }
-cleanFirebase();
-
-// spotify api search redirect is still in `index.js`
+// cleanFirebase();
 
 module.exports = router;
