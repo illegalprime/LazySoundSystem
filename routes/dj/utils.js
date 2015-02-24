@@ -1,6 +1,6 @@
 // TODO refactor this part
 var Firebase = require('firebase');
-var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
+var fb = new Firebase('https://lazysound.firebaseio.com/');
 
 var utils = {};
 

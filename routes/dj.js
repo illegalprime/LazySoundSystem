@@ -5,7 +5,7 @@ var router = express.Router();
 
 var utils = require('./dj/utils.js');
 
-var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
+var fb = new Firebase('https://lazysound.firebaseio.com/');
 var firequeues = {};
 
 router.get('/', function(req, res, next) {
