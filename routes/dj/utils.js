@@ -1,3 +1,4 @@
+// TODO refactor this part
 var Firebase = require('firebase');
 var fb = new Firebase('https://lazysound.firebaseio.com/andrewtest');
 
@@ -46,6 +47,15 @@ utils.consumeError = function(error) {
     else       console.log('Data saved successfully.');
 }
 
+/**
+ * Looks for and (tries to) provide the callback function with
+ * the DataSnapshot of a queue with the corresponding name.
+ *
+ * @param fb - (Firebase Object) Firebase reference
+ * @param name - (String) name of the queue
+ * @param callback - (function) called with the `DataSnapshot` object
+ * from names. (refer to Firebase API for more information)
+ */
 utils.doesQueueExist = function(fb, name, callback) {
     var names = fb.child('names');
     names.child(name).once('value', function(snapshot) {
@@ -53,6 +63,19 @@ utils.doesQueueExist = function(fb, name, callback) {
     });
 };
 
+/**
+ * Performs server-side validation on a (potential) name for a
+ * queue.
+ *
+ * @param queueName - (String)
+ * @param callback - (function) called with an object that has:
+ *   - name: (String) with the queueName
+ * if the name is valid (doesn't have illegal characters):
+ *   - unique: (boolean) whether or not the name has already been taken
+ * if the name is invalid:
+ *   - error: (Object) detailing the error
+ *     - error.name: (String) with a message about invalid characters
+ */
 utils.validate = function(queueName, callback) {
     queueName = queueName || "";
     var illegalChars = new RegExp("[^A-Za-z0-9-_]", "g");
@@ -60,7 +83,7 @@ utils.validate = function(queueName, callback) {
     if (!illegalChars.exec(queueName) && (queueName.length !== 0)) {
         // valid (no illegal characters) name
         utils.doesQueueExist(fb, queueName, function(snapshot) {
-            // if this name is not already taken
+            // is this name taken?
             result.unique = !snapshot.val();
             callback(result);
         });
