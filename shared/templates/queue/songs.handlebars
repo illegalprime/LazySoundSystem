@@ -1,0 +1,12 @@
+<!-- next up goes here -->
+{{#if songs}}
+<h2>Songs in the queue:</h2>
+<ol id="song-list">
+    {{#each songs}}
+    <li data-song-id="{{{@key}}}"><p><a href="{{{song.stream}}}" target="_newtab">
+        {{{song.name}}} - {{{song.artist}}}</a></p></li>
+    {{/each}}
+</ol>
+{{else}}
+<p>There are no songs in the queue</p>
+{{/if}}

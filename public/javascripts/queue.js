@@ -8,6 +8,11 @@ var search_req;
  * (String)
  */
 var newestQuery;
+/**
+ * Firebase reference TODO: keep this read only
+ * queueID is a global variable established in a seperate script
+ */
+var fb = new Firebase("https://lazysound.firebaseio.com");
 
 /**
  * Takes a query and a callback and sends the result (from a Spotify API
@@ -52,7 +57,7 @@ function searchFor(query, callback) {
  * @param data - data object sent from the `searchFor` method above
  * this is the format defined by Spotify's API.
  */
-function updateHints(data) {
+function updateResults(data) {
     var args = { message: "No results" };
     // TODO the "No results" message shows up when deleting
     // text and the page is too slow updating the `data` object
@@ -64,20 +69,30 @@ function updateHints(data) {
     } else if (newestQuery === "") {
         args.message = "";
     }
-    $("#results").html(Handlebars.templates['queue/search-results']( args ))
+    $("#results").html(Handlebars.templates['queue/search-results']( args ));
+}
 
+/**
+ *
+ *
+ * @param data - (DataSnapshot) refer to Firebase docs
+ */
+function showSongs(data) {
+    current = data.val();
+    $("#songs").html(Handlebars.templates['queue/songs']( { songs: data.val() } ));
 }
 
 /**
  * Initalizes the functionality of this page.
  * (As of now - 2/17/2015) this function links together the above
- * functions (`searchFor` and `updateHints`) to DOM events (namely
+ * functions (`searchFor` and `updateResults`) to DOM events (namely
  * `keyup` events in the search box).
  */
 function init() {
     $('#search').keyup(function() {
-        searchFor($('#search').val(), updateHints);
+        searchFor($('#search').val(), updateResults);
     });
+    fb.child("queues/" + queueID).on('value', showSongs);
 }
 
 if (!document.body) {

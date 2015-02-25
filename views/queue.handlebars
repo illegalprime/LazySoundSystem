@@ -2,8 +2,11 @@
 <p>Welcome to {{id}}&rsquo;s queue</p>
 <input type="text" id="search" autocomplete="off" name="q">
 <div id="results">
-  <!-- search results go here -->
+    <!-- search results go here -->
 </div>
-<script type="text/javascript">firebaseID = "{{{key}}}"</script>
+<div id="songs">
+    <!-- list of songs goes here -->
+</div>
+<script type="text/javascript">queueID = "{{{key}}}"</script>
 <script src="https://cdn.firebase.com/js/client/2.2.0/firebase.js"></script>
 <script src="/javascripts/queue.js"></script>
