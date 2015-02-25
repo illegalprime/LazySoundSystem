@@ -17,6 +17,7 @@ router.all('/*', function(req, res, next) {
     }
     authAnon();
     //get that weak shit outta here
+    console.log("Not auth'd, get that weak shit outta here");
     //redirects to home post auth
     return res.redirect('back');
 })
@@ -87,6 +88,8 @@ router.post('/:id/action/:action', function(req, res) {
     var data   = req.body;
     var id     = req.params.id;
     data.name  = id;
+    console.log(JSON.stringify(req.body));
+    console.log(JSON.stringify(data));
     data.user = req.signedCookies['userID'];
     data.queueID = req.signedCookies['' + req.params.id];
     console.log("this be cookie   " + data.user);
@@ -255,6 +258,7 @@ var removeQueue = function(metaID, finish) {
 
 var authAnon = function() {
     fb.authAnonymously(function(error, authData) {
+        console.log("anonAuth");
         if (error) {
             console.log("Login Failed!", error);
         } else {
@@ -266,6 +270,7 @@ var authAnon = function() {
 
 var authUser = function() {
     fb.authAnonymously(function(error, authData) {
+        console.log("anonUser");
         if (error) {
             console.log("Login Failed!", error);
         } else {

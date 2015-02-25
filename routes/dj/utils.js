@@ -23,10 +23,7 @@ utils.addQueue = function(name, callback, error) {
 
     var oneDay = 86400000;
 
-    var newQueue = queues.push({
-        'filler': true
-    });
-
+    var newQueue = queues.push({});
     var newMetaQueue = metas.push({
         'name':  name,
         'expiration': (new Date().getTime()) + oneDay,
