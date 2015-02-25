@@ -32,7 +32,6 @@ function searchFor(query, callback) {
             type: 'track',
             limit: 5
         },
-        type: "POST",
         success: function(data) {
             if (query == newestQuery) {
                 callback(JSON.parse(data));
@@ -62,6 +61,8 @@ function updateHints(data) {
     // - Andrew
     if (data && data.tracks.items.length > 0) {
         args = { items: data.tracks.items };
+    } else if (newestQuery === "") {
+        args.message = "";
     }
     $("#results").html(Handlebars.templates['queue/search-results']( args ))
 
