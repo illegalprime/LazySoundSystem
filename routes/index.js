@@ -7,8 +7,8 @@ var fb = new Firebase('https://lazysound.firebaseio.com/');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  authAnon();
-  res.render('index', { title: 'The LazySoundSystem' });
+    authAnon();
+    res.render('index', { title: 'The LazySoundSystem' });
 });
 
 /**
@@ -60,7 +60,6 @@ var authAnon = function() {
             console.log("Login Failed!", error);
         } else {
             console.log("Authenticated successfully with payload:", authData);
-
         }
     } );
 }

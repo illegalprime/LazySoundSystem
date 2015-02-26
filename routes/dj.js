@@ -218,10 +218,6 @@ var synccalls  = {
     'unvote':   vote.bind(undefined,  null)
 };
 
-var authenticate = function(id, user, callback) {
-    callback(false);
-}
-
 var removeQueue = function(metaID, finish) {
     fb.child('metaqueues/' + metaID).once('value', function(snap) {
         var removeName  = {};
@@ -262,7 +258,6 @@ var authUser = function() {
         }
     } );
 }
-
 
 var cleanFirebase = function() {
     var oldestQueues = fb.child('metaqueues').orderByChild('expiration');
