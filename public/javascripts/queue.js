@@ -74,10 +74,13 @@ function updateResults(data) {
     } else if (newestQuery === "") {
         args.message = "";
     }
-    $("#results").html(Handlebars.templates['queue/search-results']( args ));
+    $('#results').html(Handlebars.templates['queue/search-results']( args ));
     $('.addSong').on('click', function(e) {
         addSong($(e.target).attr('data-index'));
-
+        $('#search').val("");
+        $('#results').slideUp(300, function() {
+            searchFor("", updateResults);
+        });
     });
 }
 
