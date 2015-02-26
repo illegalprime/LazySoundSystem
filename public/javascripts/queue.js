@@ -5,7 +5,6 @@
 var search_req;
 /**
  * Most recent search results
- *
  */
 var search_res;
 /**
@@ -106,25 +105,22 @@ function addSong(index) {
 }
 
 /**
- *
- *
- * @param data - (DataSnapshot) refer to Firebase docs
- */
-function showSongs(data) {
-    $("#songs").html(Handlebars.templates['queue/songs']( { songs: data.val() } ));
-}
-
-/**
  * Initalizes the functionality of this page.
- * (As of now - 2/17/2015) this function links together the above
- * functions (`searchFor` and `updateResults`) to DOM events (namely
- * `keyup` events in the search box).
+ * This function:
+ *  - links together the above functions
+ * (`searchFor` and `updateResults`) to DOM events (namely `keyup`
+ * events in the search box)
+ *  - Render song list from DataSnapshot triggered by changes to
+ * Firebase
  */
 function init() {
     $('#search').keyup(function() {
         searchFor($('#search').val(), updateResults);
     });
-    fb.child("queues/" + queueID).on('value', showSongs);
+    fb.child("queues/" + queueID).on('value', function(data) {
+        $("#songs").html(Handlebars.templates['queue/songs'](
+            { songs: data.val() }));
+    });
 }
 
 if (!document.body) {

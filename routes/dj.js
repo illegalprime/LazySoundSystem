@@ -61,14 +61,6 @@ router.get('/:id', function(req, res, next) {
     });
 });
 
-// router.get('/:id/:user/', function(req, res, next) {
-//     authenticate(req.params.id, req.params.user, function(authenticated) {
-//         if (!authenticated) {
-//             res.status(403).send('Not Authenticated!');
-//         }
-//     });
-// });
-
 // Requests are of this form:
 // Rest: localhost:3000/dj/<id>/action/<action>
 // Request Body (Elements exist if applicable):
@@ -84,6 +76,9 @@ router.get('/:id', function(req, res, next) {
 //         'stream' : stream
 //     }
 // }
+// NOTE: 'song' object should be a 'JSON stringified' string that
+// can be legally converted back into the correct JSON object
+// adhering to structure outlined above
 router.post('/:id/action/:action', function(req, res) {
     var action = req.params.action;
     var data   = req.body;
