@@ -6,7 +6,7 @@
  * the name is unique
  *
  */
-var showButton = function(newQueue) {
+var updateSubmitButton = function(newQueue) {
     if (newQueue === true) {
         $("#gotoQueue").val("Make a new queue");
     } else if (newQueue === false) {
@@ -33,6 +33,9 @@ var checkForm = function(callback) {
     // Client-side validation
     var illegalChars = new RegExp("[^A-Za-z0-9-_]");
     if (queueName === "" || illegalChars.exec(queueName)) {
+        if (queueName === "") {
+            updateSubmitButton(false);
+        }
         $("#illegalChars").show();
         if (callback) { callback({error: true}); }
         return false;
@@ -48,8 +51,8 @@ var checkForm = function(callback) {
             if (result.error) {
                 $("#illegalChars").show();
             } else {
-                if (result.unique) { showButton(true); }
-                else { showButton(false); }
+                if (result.unique) { updateSubmitButton(true); }
+                else { updateSubmitButton(false); }
             }
             if (callback) { callback(result); }
         }, error: function(data) {

@@ -53,7 +53,7 @@ router.get('/:id', function(req, res, next) {
             res.redirect('/dj/new?q='+queueName);
         } else {
             res.render('queue', {
-                id:    queueName,
+                title:    queueName,
                 hbs:   true,
                 key: key
             });
