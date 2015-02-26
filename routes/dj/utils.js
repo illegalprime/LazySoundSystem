@@ -13,8 +13,6 @@ var utils = {};
  *      `callback` is supplied with a String with the new queue's "id".
  * @param error (Function) called when something fails (hopefully with an error)
  *      `error` is supplied with an Object that describes the error.
- *      TODO The keys of the Object coorespond with the keys in the new queue
- *      that caused the error.
  */
 utils.addQueue = function(name, callback, error) {
     var names  = fb.child('names');
