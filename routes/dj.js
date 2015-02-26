@@ -62,7 +62,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 // Requests are of this form:
-// Rest: localhost:3000/dj/<id>/action/<action>
+// Rest: localhost:3000/dj/<id>/<action>
 // Request Body (Elements exist if applicable):
 // {
 //     'userKey': '-Ji756Q4yxaqR8R3iq53'
@@ -79,7 +79,7 @@ router.get('/:id', function(req, res, next) {
 // NOTE: 'song' object should be a 'JSON stringified' string that
 // can be legally converted back into the correct JSON object
 // adhering to structure outlined above
-router.post('/:id/action/:action', function(req, res) {
+router.post('/:id/:action', function(req, res) {
     var action = req.params.action;
     var data   = req.body;
     var id     = req.params.id;
@@ -117,7 +117,7 @@ router.post('/:id/action/:action', function(req, res) {
 });
 
 // API for adding a song:
-// Rest: localhost:3000/dj/<id>/action/add
+// Rest: localhost:3000/dj/<id>/add
 // {
 //     "queueID": "-JiSZLt18d9C5zmpQDBw",
 //     "song": {
@@ -144,9 +144,9 @@ var addSong = function(data, callback) {
 }
 
 // API for upvoting a song:
-// Rest: localhost:3000/dj/<id>/action/unvote
-//       localhost:3000/dj/<id>/action/upvote
-//       localhost:3000/dj/<id>/action/downvote
+// Rest: localhost:3000/dj/<id>/unvote
+//       localhost:3000/dj/<id>/upvote
+//       localhost:3000/dj/<id>/downvote
 // Data:
 // {
 //     "queueID": "-JiSZLt18d9C5zmpQDBw",
@@ -188,7 +188,7 @@ var vote = function(value, data, callback) {
 }
 
 // API for upvoting a song:
-// Rest: localhost:3000/dj/<id>/action/veto
+// Rest: localhost:3000/dj/<id>/veto
 // Data:
 // {
 //     "queueID": "-JiSZLt18d9C5zmpQDBw",

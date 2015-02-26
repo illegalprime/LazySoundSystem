@@ -92,7 +92,7 @@ function addSong(index) {
     };
     var stringData = JSON.stringify(cleaned);
     $.ajax({
-        url: window.location.pathname + "/action/add",
+        url: window.location.pathname + "/add",
         type: 'POST',
         data: {
             queueID: queueID,
