@@ -4,6 +4,11 @@
  */
 var search_req;
 /**
+ * Most recent search results
+ *
+ */
+var search_res;
+/**
  * The newest query typed into the search box.
  * (String)
  */
@@ -66,10 +71,38 @@ function updateResults(data) {
     // - Andrew
     if (data && data.tracks.items.length > 0) {
         args = { items: data.tracks.items };
+        search_res = data.tracks.items;
     } else if (newestQuery === "") {
         args.message = "";
     }
     $("#results").html(Handlebars.templates['queue/search-results']( args ));
+    $('.addSong').on('click', function(e) {
+        addSong($(e.target).attr('data-index'));
+
+    });
+}
+
+function addSong(index) {
+    var song = search_res[index];
+    var cleaned = {
+        artist: song.artists[0].name,
+        album: song.album.name,
+        name: song.name,
+        cover: song.album.images[0].url,
+        stream: song.external_urls.spotify
+    };
+    var stringData = JSON.stringify(cleaned);
+    $.ajax({
+        url: window.location.pathname + "/action/add",
+        type: 'POST',
+        data: {
+            queueID: queueID,
+            song: stringData
+        },
+        success: function(data) {
+            console.log("yay! added a song!")
+        }
+    });
 }
 
 /**
@@ -78,7 +111,6 @@ function updateResults(data) {
  * @param data - (DataSnapshot) refer to Firebase docs
  */
 function showSongs(data) {
-    current = data.val();
     $("#songs").html(Handlebars.templates['queue/songs']( { songs: data.val() } ));
 }
 

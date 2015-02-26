@@ -6,8 +6,10 @@ print a provided message (indicating that there were no results).
 {{#unless message}}
 <ol>
     {{#items}}
-    <li><p><a href="{{{external_urls.spotify}}}" target="_newtab">
-        {{{name}}} - {{{artists.[0].name}}}</a></p></li>
+    <li><div><a href="{{{external_urls.spotify}}}" target="_newtab">
+        {{{name}}} - {{{artists.[0].name}}}</a>
+        <input class="addSong" data-index="{{{@index}}}" type="button" value="add" />
+        </div></li>
     {{/items}}
 </ol>
 {{else}}

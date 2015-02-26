@@ -11,13 +11,14 @@ var firequeues = {};
 router.all('/*', function(req, res, next) {
     console.log("big brother is watching");
     if (fb.getAuth()) {
-        console.log(fb.getAuth());
+        console.log("We are auth'd");
         res.cookie('userID', "" + fb.getAuth().uid+"", {signed: true});
         return next();
     }
     authAnon();
     //get that weak shit outta here
     console.log("Not auth'd, get that weak shit outta here");
+    // return next();
     //redirects to home post auth
     return res.redirect('back');
 })
@@ -87,13 +88,9 @@ router.post('/:id/action/:action', function(req, res) {
     var action = req.params.action;
     var data   = req.body;
     var id     = req.params.id;
-    data.name  = id;
-    console.log(JSON.stringify(req.body));
-    console.log(JSON.stringify(data));
     data.user = req.signedCookies['userID'];
     data.queueID = req.signedCookies['' + req.params.id];
-    console.log("this be cookie   " + data.user);
-    console.log("this be cookie   " + data.queueID);
+    data.song = JSON.parse(data.song);
     var respond = function(error) {
         if (error) {
             res.status(500).send("Error");
@@ -137,21 +134,13 @@ router.post('/:id/action/:action', function(req, res) {
 //     }
 // }
 var addSong = function(data, callback) {
-    if (!data.queueID || !data.song) {
+    if (!data.queueID || !data.song.name) {
+    // if (!data.queueID || !data['song[name]']) {
         callback(false);
     }
-    var song  = data.song;
     var queue = fb.child('queues/' + data.queueID);
 
-    var newSong = queue.push({
-        'song': {
-            'artist' : song.artist,
-            'album'  : song.album,
-            'name'   : song.name,
-            'cover'  : song.cover,
-            'stream' : song.stream
-        }
-    }, function(error) {
+    var newSong = queue.push( { song: data.song }, function(error) {
         if (!error) {
             queue.child(newSong.key()).setPriority(0);
         }
