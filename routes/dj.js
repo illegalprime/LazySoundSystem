@@ -86,7 +86,11 @@ router.post('/:id/:action', function(req, res) {
     var id     = req.params.id;
     data.user = req.signedCookies['userID'];
     data.queueID = req.signedCookies['' + req.params.id];
-    data.song = JSON.parse(data.song);
+    console.log(JSON.stringify(data));
+
+    if (data.song) {
+        data.song = JSON.parse(data.song);
+    }
     var respond = function(error) {
         if (error) {
             res.status(500).send("Error");
