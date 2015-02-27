@@ -98,7 +98,6 @@ function addSong(index) {
         url: window.location.pathname + "/add",
         type: 'POST',
         data: {
-            queueID: queueID,
             song: stringData
         },
         success: function(data) {
@@ -120,15 +119,10 @@ function init() {
     $('#search').keyup(function() {
         searchFor($('#search').val(), updateResults);
     });
-    fb.child("queues/" + queueID).on('value', function(data) {
-        console.log(data);
+    fb.child("queues/" + queueID).orderByPriority().on('value', function(data) {
         $("#songs").html(Handlebars.templates['queue/songs']({
             songs: data.val()
         }));
-        /**
-        * Handles the upvoting event.
-        * TODO: queueID and user should be replaced by cookie data.
-        */
         $('.upvote').click(function() {
             vote('/upvote', $(this));
         });
@@ -138,13 +132,16 @@ function init() {
     });
 }
 
+/**
+* Handles the upvoting event.
+* TODO: queueID and user should be replaced by cookie data.
+*/
 function vote(url, element) {
     var songID = element.parent().parent().attr('data-song-id');
     $.ajax({
         url: window.location.pathname + url,
         type: 'POST',
         data: {
-            queueID: queueID,
             songID:  songID,
             user:    "hi"
         }
