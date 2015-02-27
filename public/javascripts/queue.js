@@ -129,6 +129,9 @@ function init() {
         $('.downvote').click(function() {
             vote('/downvote', $(this));
         });
+        $('.veto').click(function() {
+            vote('/veto', $(this));
+        });
     });
 }
 
