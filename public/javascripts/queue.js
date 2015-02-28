@@ -121,7 +121,7 @@ function init() {
     });
     fb.child("queues/" + queueID).orderByPriority().on('value', function(data) {
         $("#songs").html(Handlebars.templates['queue/songs']({
-            songs: data.val()
+            songs: {}
         }));
         $('.upvote').click(function() {
             vote('/upvote', $(this));
@@ -132,6 +132,7 @@ function init() {
         $('.veto').click(function() {
             vote('/veto', $(this));
         });
+        graphicsAdd($('#song-list'), data.val());
     });
 }
 
@@ -149,6 +150,24 @@ function vote(url, element) {
             user:    "hi"
         }
     });
+}
+
+function graphicsAdd(root, songs) {
+    var list;
+    if (songs) {
+        list = $(Handlebars.templates['queue/song']({
+            songs: songs
+        }));
+    }
+
+    list.hide();
+    root.append(list);
+
+    (function showItem(element) {
+        element.slideDown(100, function() {
+            $(this).next().length && showItem($(this).next());
+        });
+    })(list.first());
 }
 
 if (!document.body) {

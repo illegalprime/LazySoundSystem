@@ -1,0 +1,10 @@
+{{#each songs}}
+<li data-song-id="{{{@key}}}"><p>
+    <span class="downvote"><i class="fa fa-angle-down fa-2x"></i></span>
+    <span class="upvote">  <i class="fa fa-angle-up fa-2x">  </i></span>
+    <span class="veto">    <i class="fa fa-times fa-2x">     </i></span>
+    <a href="{{{song.stream}}}" target="_newtab">
+        {{{song.name}}} - {{{song.artist}}}
+    </a>
+</p></li>
+{{/each}}
