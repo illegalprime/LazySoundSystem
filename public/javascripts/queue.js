@@ -17,6 +17,11 @@ var newestQuery;
  * queueID is a global variable established in a seperate script
  */
 var fb = new Firebase("https://lazysound.firebaseio.com");
+/**
+ * Most recent JSON of queue to hold past data so we can check what changed
+ * when firebase gives us an update.
+ */
+var oldqueue;
 
 /**
  * Takes a query and a callback and sends the result (from a Spotify API
@@ -120,6 +125,8 @@ function init() {
         searchFor($('#search').val(), updateResults);
     });
     fb.child("queues/" + queueID).orderByPriority().on('value', function(data) {
+        diff(data.val());
+
         $("#songs").html(Handlebars.templates['queue/songs']({
             songs: data.val()
         }));
@@ -152,12 +159,60 @@ function vote(url, element) {
     });
 }
 
+/**
+ * Find the difference between queues and apply them to the UI
+ */
+function diff(curr) {
+    console.log(curr);
+    if (!oldqueue) {
+        oldqueue = curr;
+        return;
+    }
+    var oldkeys = Object.keys(oldqueue);
+    var newkeys = Object.keys(curr);
+
+    for (var i = 0, j = 0; i < oldkeys.length && j < newkeys.length;) {
+        if (oldkeys[i] == newkeys[j]) {
+            ++i, ++j;
+        }
+        else if (oldkeys[i] > newkeys[j]) {
+            do {
+                console.log('Added: ' + newkeys[j]);
+                ++j;
+            } while (oldkeys[i] > newkeys[j]);
+        }
+        else if (oldkeys[i] < newkeys[j]) {
+            do {
+                console.log('Removed: ' + oldkeys[i]);
+                ++i;
+            } while (oldkeys[i] < newkeys[j]);
+        }
+    }
+}
+
+/**
+ * Removes an element from the list, animating it.
+ */
+function graphicsRemove(item, speed) {
+    item.slideUp(speed, function() {
+        $(this).remove();
+    });
+}
+
+/**
+ * Adds a list of songs to the queue with animations
+ * can add one song at a specific place making what is
+ * happening to the queue clearer.
+ */
 function graphicsAdd(root, songs, speed) {
     var list;
     if (songs) {
         list = $(Handlebars.templates['queue/song']({
             songs: songs
         }));
+    }
+    else {
+        list = $('<li></li>');
     }
 
     list.hide();
@@ -168,6 +223,13 @@ function graphicsAdd(root, songs, speed) {
             $(this).next().length && showItem($(this).next());
         });
     })(list.first());
+}
+
+/**
+ * Moves an element up or down some in the queue, graphically
+ */
+function graphicsMove(item, dy) {
+
 }
 
 if (!document.body) {
