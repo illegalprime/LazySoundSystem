@@ -1,18 +1,7 @@
 <!-- next up goes here -->
 {{#if songs}}
-<h2>Songs in the queue:</h2>
-<ol id="song-list">
-    {{#each songs}}
-    <li data-song-id="{{{@key}}}"><p>
-        <span class="downvote"><i class="fa fa-angle-down fa-2x"></i></span>
-        <span class="upvote">  <i class="fa fa-angle-up fa-2x">  </i></span>
-        <span class="veto">    <i class="fa fa-times fa-2x">     </i></span>
-        <a href="{{{song.stream}}}" target="_newtab">
-            {{{song.name}}} - {{{song.artist}}}
-        </a>
-    </p></li>
-    {{/each}}
-</ol>
+    <h2>Songs in the queue:</h2>
+    <ol id="song-list"></ol>
 {{else}}
-<p>There are no songs in the queue</p>
+    <p>There are no songs in the queue</p>
 {{/if}}
