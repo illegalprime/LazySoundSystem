@@ -1,13 +1,18 @@
 
 
 {{#each songs}}
-<div class="queue-element" data-song-id="{{{@key}}}"><p>
-    <img class="coverart" src="{{song.cover}}" />
-    <span class="downvote"><i class="fa fa-angle-down fa-2x"></i></span>
-    <span class="upvote">  <i class="fa fa-angle-up fa-2x">  </i></span>
-    <span class="veto">    <i class="fa fa-times fa-2x">     </i></span>
-    <a href="{{{song.stream}}}" target="_newtab">
-        {{{song.name}}} - {{{song.artist}}}
-    </a>
+<div class="queue-element" style="background-image: url('{{song.cover}}');" data-song-id="{{{@key}}}"><p>
+    <div class="info"><p>
+        <a href="{{{song.stream}}}" target="_newtab">
+            {{{song.name}}}
+        </a>
+        <br/>
+        {{{song.artist}}}
+    </p></div>
+    <div class="controls">
+        <span class="downvote"><i class="fa fa-angle-down fa-2x"></i></span>
+        <span class="upvote">  <i class="fa fa-angle-up fa-2x">  </i></span>
+        <span class="veto">    <i class="fa fa-times fa-2x">     </i></span>
+    </div>
 </p></div>
 {{/each}}

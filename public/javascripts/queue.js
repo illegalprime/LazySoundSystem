@@ -125,7 +125,7 @@ function init() {
         searchFor($('#search').val(), updateResults);
     });
     fb.child("queues/" + queueID).orderByPriority().on('value', function(data) {
-        diff(data.val());
+        // diff(data.val());
 
         $("#songs").html(Handlebars.templates['queue/songs']({
             songs: data.val()
@@ -207,7 +207,7 @@ function graphicsRemove(item, speed) {
 function graphicsAdd(root, songs, speed) {
     var list;
     if (songs) {
-        list = $(Handlebars.templates['queue/song']({
+        list = $(Handlebars.templates['queue/song2']({
             songs: songs
         }));
     }

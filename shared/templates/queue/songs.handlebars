@@ -1,7 +1,14 @@
 <!-- next up goes here -->
-{{#if songs}}
+<!-- {{#if songs}}
     <h2>Songs in the queue:</h2>
     <ol id="song-list"></ol>
+{{else}}
+    <p>There are no songs in the queue</p>
+{{/if}} -->
+
+{{#if songs}}
+    <h2>Songs in the queue:</h2>
+    <div id="song-list"></div>
 {{else}}
     <p>There are no songs in the queue</p>
 {{/if}}
