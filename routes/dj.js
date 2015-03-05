@@ -93,7 +93,12 @@ router.post('/:id/:action', function(req, res) {
     }
     var respond = function(error) {
         if (error) {
-            res.status(500).send("Error");
+            console.log(error);
+            if (error.code) {
+                res.status(error.code).send();
+            } else {
+                res.status(500).send("Error");
+            }
         }
         else {
             res.send("OK");

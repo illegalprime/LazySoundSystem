@@ -42,7 +42,7 @@ actions.addSong = function(data, callback) {
 // }
 actions.vote = function(value, data, callback) {
     if (!data.queueID || !data.songID || !data.user) {
-        callback(true);
+        callback({ code: 500 });
     }
 
     var song  = fb.child('queues/' + data.queueID + '/' + data.songID);
@@ -53,7 +53,7 @@ actions.vote = function(value, data, callback) {
             votes.child(data.user).once('value', function(uSnap) {
                 if (uSnap.val() == value) {
                     // User already voted
-                    callback(true);
+                    callback({ code: 403 });
                 }
                 else {
                     newVote = {};
@@ -70,7 +70,9 @@ actions.vote = function(value, data, callback) {
                 }
             });
         }
-        else callback(true);
+        else {
+            callback({ code: 500 });
+        }
     });
 };
 
