@@ -14,7 +14,7 @@ var search_res;
 var newestQuery;
 /**
  * Firebase reference TODO: keep this read only
- * queueID is a global variable established in a seperate script
+ * queueID is a global variable established in a separate script
  */
 var fb = new Firebase("https://lazysound.firebaseio.com");
 /**
@@ -32,12 +32,14 @@ var oldqueue;
  */
 function searchFor(query, callback) {
     newestQuery = query;
+    // If there is an exisiting/active search request,
+    // cancel it before continuing
+    if (search_req) {
+        search_req.abort();
+    }
     if (!query || query == "") {
         callback();
         return;
-    }
-    if (search_req) {
-        search_req.abort();
     }
     search_req = $.ajax({
         url:  '/call/spotify/search',
@@ -73,20 +75,46 @@ function updateResults(data) {
     // We need to find a way to identify when data is simply lagging
     // vs. actually non-existant (this might be ... really hard?)
     // - Andrew
+    // Can't replicate this issue anymore... Might investigate
+    // further later...
+    // - Future Andrew (6/16)
     if (data && data.tracks.items.length > 0) {
         args = { items: data.tracks.items };
         search_res = data.tracks.items;
     } else if (newestQuery === "") {
         args.message = "";
     }
-    $('#results').html(Handlebars.templates['queue/search-results']( args ));
+    // Render the precompiled Handlebars templates and then set them
+    // as the html of the $('#results') DOM object
+    $('#results')
+      .html(Handlebars.templates['queue/search-results']( args ))
+      .slideDown(300);
+
+    // Need to re-add the "on-click" listener to newly-made results
+    // in order to add new songs from newly generated search results
     $('.addSong').on('click', function(e) {
         addSong($(e.target).attr('data-index'));
-        $('#search').val("");
+        // After a song is added, collapse and remove the search
+        // results element from the page and clear the search results.
         $('#results').slideUp(300, function() {
-            searchFor("", updateResults);
+            clearSearch();
         });
     });
+}
+
+
+/**
+ * Clears the search query from the screen and also any related data
+ * in the search params in javascript.
+ * This function will
+ *  1) cancel any existing search requests (search_req)
+ *  2) set the newestQuery to ""
+ *  and 3) set the DOM search box to ""
+ */
+function clearSearch() {
+  if (search_req) { search_req.abort(); }
+  newestQuery = "";
+  $('#search').val("");
 }
 
 function addSong(index) {
